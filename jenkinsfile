@@ -1,5 +1,6 @@
 pipeline { 
     agent any
+    environ{env= 'mon_venv'}
     stages { 
         stage('Checkout') { 
             steps { 
@@ -8,7 +9,7 @@ pipeline {
         } 
         stage('Install Dependencies') { 
             steps { 
-                sh 'python -m venv venv' 
+                sh 'python -m venv mon_venv' 
             } 
         }
  
@@ -30,7 +31,7 @@ pipeline {
         emailext subject: "Build FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
                  body: "Le build de ${env.JOB_NAME} a échoué.\nConsultez les logs ici: ${env.BUILD_URL}",
                  recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-                 to: 'afmim221@gmail.com'
+                 to: 'konateofficiel1997@gmail.com'
             } 
        }
 }
