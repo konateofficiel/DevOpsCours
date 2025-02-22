@@ -15,7 +15,7 @@ pipeline {
  
         stage('Run Script') { 
             steps { 
-                bat '.\\venv\\bin\\python Tache1.py' 
+                bat '.\\mon_venv\\bin\\python Tache1.py' 
             } 
         } 
     }
