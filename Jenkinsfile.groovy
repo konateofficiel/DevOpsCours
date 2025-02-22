@@ -1,38 +1,41 @@
-pipeline { 
+pipeline {
     agent any
-    environ {env = 'mon_venv'
+    environment {
+        VENV_DIR = 'mon_venv'
     }
-    stages { 
-        stage('Checkout') { 
-            steps { 
-                git branch: 'main', url: 'https://github.com/konateofficiel/DevOpsCours.git' 
-            } 
-        } 
-        stage('Install Dependencies') { 
-            steps { 
-                sh 'python -m venv mon_venv' 
-            } 
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'master', url: 'https://github.com/konateofficiel/DevOpsCours.git'
+            }
         }
- 
-        stage('Run Script') { 
-            steps { 
-                bat '.\\mon_venv\\bin\\python Tache1.py' 
-            } 
-        } 
+        stage('Setup') {
+            steps {
+                bat 'python -m venv mon_venv'  // Crée un environnement virtuel
+                // bat '.\\venv\\Scripts\\pip install -r requirements.txt'  // Installe les dépendances
+            }
+        }
+        stage('Run Script') {
+            steps {
+                bat '.\\mon_venv\\Scripts\\python Tache1.py'  // Exécute le script Python
+            }
+        }
+        stage('Notify') {
+            steps {
+                script {
+                    def result = currentBuild.result ?: 'SUCCESS'
+                    emailext subject: "Jenkins Build: ${result}",
+                        body: "Build Status: ${result}\nVoir Jenkins: ${env.BUILD_URL}",
+                        to: 'konateofficiel1997@gmail.com'
+                }
+            }
+        }
     }
- 
-    post { 
-    success { 
-        emailext subject: "Build SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                 body: "Le build de ${env.JOB_NAME} a réussi.\nConsultez les logs ici: ${env.BUILD_URL}",
-                 recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-                 to: 'konateofficiel1997@gmail.com'
-    } 
-    failure { 
-        emailext subject: "Build FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                 body: "Le build de ${env.JOB_NAME} a échoué.\nConsultez les logs ici: ${env.BUILD_URL}",
-                 recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-                 to: 'konateofficiel1997@gmail.com'
-            } 
-       }
+    post {
+        failure {
+            emailext subject: "Échec du build Jenkins",
+                body: "Échec du pipeline : ${env.BUILD_URL}",
+                to: 'konateofficiel1997@gmail.com'
+        }
+    }
 }
